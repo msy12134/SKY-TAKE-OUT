@@ -8,8 +8,11 @@ import com.sky.service.dishservice;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.ibatis.annotations.Delete;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @Slf4j
@@ -37,4 +40,11 @@ public class dishController {
         return Result.success(pageResult);
     }
 
+    @DeleteMapping()
+    @ApiOperation("删除菜品")
+    public Result delete(@RequestParam List<Long> ids) {
+        log.info("删除菜品{}",ids);
+        dishservice.delete(ids);
+        return Result.success();
+    }
 }
