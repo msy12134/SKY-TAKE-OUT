@@ -11,9 +11,11 @@ import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.annotations.Delete;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Set;
 
 @RestController
 @Slf4j
@@ -23,12 +25,18 @@ public class dishController {
     @Autowired
     private dishservice  dishservice;
 
+    @Autowired
+    private RedisTemplate redisTemplate;
+
 
     @PostMapping
     @ApiOperation("新增菜品")
     public Result save(@RequestBody DishDTO dishDTO){
         log.info("新增菜品{}",dishDTO);
         dishservice.savewithFlavor(dishDTO);
+
+        String key="dish_"+dishDTO.getCategoryId();
+        redisTemplate.delete(key);
         return Result.success();
     }
 
@@ -46,6 +54,8 @@ public class dishController {
     public Result delete(@RequestParam List<Long> ids) {
         log.info("删除菜品{}",ids);
         dishservice.delete(ids);
+        Set keys=redisTemplate.keys("dish_");
+        redisTemplate.delete(keys);
         return Result.success();
     }
     @GetMapping("/{id}")
@@ -60,6 +70,9 @@ public class dishController {
     public Result update_dish_and_flavor(@RequestBody DishDTO dishDTO){
         log.info("更新数据为{}",dishDTO);
         dishservice.update_dish_and_flavor(dishDTO);
+        Set keys=redisTemplate.keys("dish_");
+        redisTemplate.delete(keys);
+
         return Result.success();
     }
 }
